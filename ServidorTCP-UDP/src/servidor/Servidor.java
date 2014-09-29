@@ -1,16 +1,22 @@
 package servidor;
 
 import javax.net.ssl.*;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.headless.HeadlessMediaPlayer;
-import uk.co.caprica.vlcj.test.VlcjTest;
+import uk.co.caprica.vlcj.test.*;
 
-public class Servidor
+import uk.co.caprica.vlcj.binding.LibVlc;
+import uk.co.caprica.vlcj.runtime.RuntimeUtil;
+
+import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
+
+public class Servidor extends VlcjTest
 {
-
 	private static int numeroDeThreadsActivos=0;
 	private static int limiteThreads=300;
 	private static Queue<ThreadServidor> cola=new LinkedList<>();
@@ -21,14 +27,18 @@ public class Servidor
 
 	public static void main(String[] args) throws Exception
 	{
-		 SSLServerSocketFactory sslServerSocketFactory =
-                 (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-         SSLServerSocket sslServerSocket =
-                 (SSLServerSocket) sslServerSocketFactory.createServerSocket(9999);
+		NativeLibrary.addSearchPath(
+				RuntimeUtil.getLibVlcLibraryName(), "/Applications/VLC.app/Contents/MacOS/lib"
+				);
+		Native.loadLibrary(RuntimeUtil.getLibVlcLibraryName(), LibVlc.class);
+		SSLServerSocketFactory sslServerSocketFactory =
+				(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+		SSLServerSocket sslServerSocket =
+				(SSLServerSocket) sslServerSocketFactory.createServerSocket(9999);
 		//ServerSocket servidor = new ServerSocket(9999);
 		while (true)
 		{
-			 SSLSocket socket = (SSLSocket) sslServerSocket.accept();
+			SSLSocket socket = (SSLSocket) sslServerSocket.accept();
 			//Socket socket=servidor.accept();
 			ThreadServidor hilo=new ThreadServidor(socket);
 			atenderCliente(hilo);
@@ -48,7 +58,7 @@ public class Servidor
 	public static synchronized void terminarConexion(long demora){
 		clientesAtendidos++;
 		timepoEnAtencion += demora;
-		System.out.println("Tiempo promedio de atenci—n: "+timepoEnAtencion/clientesAtendidos);
+		System.out.println("Tiempo promedio de atenciï¿½n: "+timepoEnAtencion/clientesAtendidos);
 		numeroDeThreadsActivos--;
 		if (!cola.isEmpty()){
 			ThreadServidor hilo2 = cola.poll();
@@ -58,5 +68,4 @@ public class Servidor
 			atenderCliente(hilo2);
 		}
 	}
-
 }
