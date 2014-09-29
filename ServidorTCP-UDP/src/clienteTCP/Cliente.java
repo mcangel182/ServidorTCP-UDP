@@ -1,7 +1,8 @@
 package clienteTCP;
 
 import java.io.*;
-import java.net.*;
+import javax.net.ssl.*;
+//import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 
@@ -26,7 +27,11 @@ public class Cliente
   public static void convertirVideo(String direccionIPServidor, int puertoServidor, String archivo) throws Exception
   {
     if (!archivo.endsWith(".avi")) throw new Exception("El archivo debe ser .avi");
-    Socket socket=new Socket(direccionIPServidor,puertoServidor);
+    
+    //Socket socket=new Socket(direccionIPServidor,puertoServidor);
+    SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+    SSLSocket socket = (SSLSocket) sslSocketFactory.createSocket("localhost", 9999);
+    
     try (ObjectOutputStream salida=new ObjectOutputStream(socket.getOutputStream()); ObjectInputStream entrada=new ObjectInputStream(socket.getInputStream());)
     {
       byte[] contenidoVideoOriginal=Files.readAllBytes(Paths.get(archivo));

@@ -1,6 +1,6 @@
 package servidor;
 
-import java.net.*;
+import javax.net.ssl.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -21,10 +21,15 @@ public class Servidor
 
 	public static void main(String[] args) throws Exception
 	{
-		ServerSocket servidor = new ServerSocket(9999);
+		 SSLServerSocketFactory sslServerSocketFactory =
+                 (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+         SSLServerSocket sslServerSocket =
+                 (SSLServerSocket) sslServerSocketFactory.createServerSocket(9999);
+		//ServerSocket servidor = new ServerSocket(9999);
 		while (true)
 		{
-			Socket socket=servidor.accept();
+			 SSLSocket socket = (SSLSocket) sslServerSocket.accept();
+			//Socket socket=servidor.accept();
 			ThreadServidor hilo=new ThreadServidor(socket);
 			atenderCliente(hilo);
 		}
