@@ -31,7 +31,6 @@ public class Servidor extends VlcjTest
 				RuntimeUtil.getLibVlcLibraryName(), "/Applications/VLC.app/Contents/MacOS/lib"
 				);
 		Native.loadLibrary(RuntimeUtil.getLibVlcLibraryName(), LibVlc.class);
-		//streamingVideo();    
 		SSLServerSocketFactory sslServerSocketFactory =
 				(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		SSLServerSocket sslServerSocket =
@@ -68,38 +67,5 @@ public class Servidor extends VlcjTest
 			System.out.println("Tiempo promedio en cola: "+timepoEnCola/clientesDesencolados);
 			atenderCliente(hilo2);
 		}
-		//streamingVideo();
 	}
-
-//	public static void streamingVideo(){
-//		String media = "./data/0.mp4";
-//		
-//		String options = formatHttpStream("127.0.0.1", puertoUdp);
-//
-//		String[] args = {media};
-//
-//		MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory(args);
-//		HeadlessMediaPlayer mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
-//
-//		mediaPlayer.playMedia(media, options);
-//
-//		try {
-//			Thread.currentThread().join();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		puertoUdp++;
-//	}
-//
-//	private static String formatHttpStream(String serverAddress, int serverPort) {
-//		StringBuilder sb = new StringBuilder(60);
-//		sb.append(":sout=#duplicate{dst=std{access=http,mux=ts,");
-//		sb.append("dst=");
-//		sb.append(serverAddress);
-//		sb.append(':');
-//		sb.append(serverPort);
-//		sb.append("}}");
-//		return sb.toString();
-//	}
 }
