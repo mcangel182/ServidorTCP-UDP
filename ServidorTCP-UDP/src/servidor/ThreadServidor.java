@@ -1,14 +1,11 @@
 package servidor;
 
 import java.io.*;
-
-
 import java.net.*;
 import java.nio.file.*;
-
+import java.util.*;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.headless.HeadlessMediaPlayer;
-
 import com.xuggle.mediatool.*;
 
 public class ThreadServidor extends Thread
@@ -33,15 +30,33 @@ public class ThreadServidor extends Thread
 		System.out.println("Atendiendo cliente #"+consecutivo);
 		try (ObjectOutputStream salida=new ObjectOutputStream(socket.getOutputStream()); ObjectInputStream entrada=new ObjectInputStream(socket.getInputStream());)
 		{
-			Path archivoTemporalOriginal=Paths.get("./data/"+consecutivo+".avi");
-			Path archivoTemporalConvertido=Paths.get("./data/"+consecutivo+".mp4");
-			archivoTemporalOriginal.toFile().createNewFile();
-			archivoTemporalConvertido.toFile().createNewFile();
-			byte[] contenidoVideoOriginal=(byte[])(entrada.readObject());
-			Files.write(archivoTemporalOriginal,contenidoVideoOriginal);
-			convertirVideo(archivoTemporalOriginal.toString(),archivoTemporalConvertido.toString());
-			byte[] contenidoVideoConvertido=Files.readAllBytes(archivoTemporalConvertido);
-			salida.writeObject(contenidoVideoConvertido);
+			File archivoTemporalOriginal=new File("./data/"+consecutivo+".avi");
+			File archivoTemporalConvertido=new File("./data/"+consecutivo+".mp4");
+			archivoTemporalOriginal.createNewFile();
+			archivoTemporalConvertido.createNewFile();
+
+			FileOutputStream fileOutputStream=new FileOutputStream(archivoTemporalOriginal);
+      while (true)
+      {
+        byte[] fragmento=(byte[])(entrada.readObject());
+        if (fragmento==null) break;
+        fileOutputStream.write(fragmento);
+      }
+      fileOutputStream.close();
+			
+			convertirVideo(archivoTemporalOriginal.getAbsolutePath(),archivoTemporalConvertido.getAbsolutePath());
+			
+      byte[] buffer=new byte[1024];
+      FileInputStream fileInputStream=new FileInputStream(archivoTemporalConvertido);
+      while (true)
+      {
+        int c=fileInputStream.read(buffer);
+        if (c==-1) break;
+        salida.writeObject(Arrays.copyOf(buffer,c));
+      }
+      salida.writeObject(null);
+      fileInputStream.close();
+			
 		}
 		catch (Exception excepcion)
 		{
@@ -49,8 +64,9 @@ public class ThreadServidor extends Thread
 		}
 		long tiempoFinalEnMilisegundos=System.currentTimeMillis();
 		long demoraEnMilisegundos=tiempoFinalEnMilisegundos-tiempoInicialEnMilisegundos;
+    System.out.println("Terminando de atender cliente #"+consecutivo);
+    Servidor.terminarConexion(demoraEnMilisegundos);
 		streamingVideo("./data/"+consecutivo+".mp4");
-		Servidor.terminarConexion(demoraEnMilisegundos);
 	}
 
 	public static void convertirVideo(String archivoTemporalOriginal, String archivoTemporalConvertido)
