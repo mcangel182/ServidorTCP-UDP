@@ -1,0 +1,14 @@
+http://stilius.net/java/java_ssl.php
+
+ConnectionKeystore
+keytool -genkey -keystore ConnectionKeystore -keyalg RSA
+CN=TallerRedes, OU=Uniandes, O=Ingenieria de Sistemas, L=Bogota, ST=Cundinamarca, C=CO
+
+Parámetros de ejecución del servidor
+-Djavax.net.ssl.keyStore=ConnectionKeystore -Djavax.net.ssl.keyStorePassword=123456
+
+Parámetros de ejecución del cliente y de las pruebas
+-Djavax.net.ssl.trustStore=ConnectionKeystore -Djavax.net.ssl.trustStorePassword=123456
+
+pruebas
+video.avi 20segundos 9073KB
