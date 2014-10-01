@@ -64,7 +64,6 @@ public class ThreadServidor extends Thread
 	}
 
 	public static void streamingVideo(String media){
-		//String media = "./data/0.mp4";
 		puertoUdp++;
 		String options = formatHttpStream("127.0.0.1", puertoUdp);
 		String[] args = {media};
