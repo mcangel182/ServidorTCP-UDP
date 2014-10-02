@@ -1,6 +1,7 @@
 package servidor;
 
 import javax.net.ssl.*;
+
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -22,21 +23,21 @@ public class Servidor extends VlcjTest
 	private static long tiempoEnAtencion = 0;
 	private static int clientesDesencolados = 0;
 	private static int clientesAtendidos = 0;
-  private static File archivoEstadisticas = new File("./data/estadisticas.csv");
+	private static File archivoEstadisticas = new File("./data/estadisticas.csv");
 
 	public static void main(String[] args) throws Exception
 	{
-	  archivoEstadisticas.delete();
-    escribirEstadisticas("numeroClientesAtendidos;numeroClientesQuePasaronPorLaCola;tiempoPromedioAtencionClientes;numeroClientesEnCola;numeroClientesEnAtencion;tiempoPromedioEsperaEnCola");
-	  
-	  
-	  NativeLibrary.addSearchPath(
+		archivoEstadisticas.delete();
+		escribirEstadisticas("numeroClientesAtendidos;numeroClientesQuePasaronPorLaCola;tiempoPromedioAtencionClientes;numeroClientesEnCola;numeroClientesEnAtencion;tiempoPromedioEsperaEnCola");
+
+
+		NativeLibrary.addSearchPath(
 				RuntimeUtil.getLibVlcLibraryName(), "/Applications/VLC.app/Contents/MacOS/lib"
 				);
-    NativeLibrary.addSearchPath(
-        RuntimeUtil.getLibVlcLibraryName(), "C:/Program Files (x86)/VideoLAN/VLC"
-        );
-		
+//		NativeLibrary.addSearchPath(
+//				RuntimeUtil.getLibVlcLibraryName(), "C:/Program Files (x86)/VideoLAN/VLC"
+//				);
+
 		Native.loadLibrary(RuntimeUtil.getLibVlcLibraryName(), LibVlc.class);
 		SSLServerSocketFactory sslServerSocketFactory =
 				(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
@@ -63,6 +64,7 @@ public class Servidor extends VlcjTest
 	}
 
 	public static synchronized void terminarConexion(long demora){
+		System.out.println("termina conexion");
 		clientesAtendidos++;
 		tiempoEnAtencion += demora;
 		numeroDeThreadsActivos--;
@@ -73,33 +75,33 @@ public class Servidor extends VlcjTest
 			atenderCliente(hilo2);
 		}
 		int numeroClientesAtendidos=clientesAtendidos;
-    int numeroClientesQuePasaronPorLaCola=clientesDesencolados;
+		int numeroClientesQuePasaronPorLaCola=clientesDesencolados;
 		long tiempoPromedioAtencionClientes=clientesAtendidos>0?tiempoEnAtencion/clientesAtendidos:0;
 		int numeroClientesEnCola=cola.size();
 		int numeroClientesEnAtencion=numeroDeThreadsActivos;
 		long tiempoPromedioEsperaEnCola=clientesDesencolados>0?tiempoEnCola/clientesDesencolados:0;
 		escribirEstadisticas(numeroClientesAtendidos+";"+numeroClientesQuePasaronPorLaCola+";"+tiempoPromedioAtencionClientes+";"+numeroClientesEnCola+";"+numeroClientesEnAtencion+";"+tiempoPromedioEsperaEnCola);
 	}
-	
-	public static synchronized void escribirEstadisticas(String fila){
-	  BufferedWriter escritor=null;
-	  try
-	  {
-	    escritor=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(archivoEstadisticas,true)));
-	    escritor.write(fila+"\r\n");
-	  }
-	  catch(Exception e)
-	  {
-	  }finally
-	  {
-	    try {
-        escritor.close();
-      }
-      catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-	  }
+
+	public static void escribirEstadisticas(String fila){
+		BufferedWriter escritor=null;
+		try
+		{
+			escritor=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(archivoEstadisticas,true)));
+			escritor.write(fila+"\r\n");
+		}
+		catch(Exception e)
+		{
+		}finally
+		{
+			try {
+				escritor.close();
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 }

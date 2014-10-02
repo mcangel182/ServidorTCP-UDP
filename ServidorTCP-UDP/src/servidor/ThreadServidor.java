@@ -4,16 +4,17 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.*;
 import java.util.*;
+
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 import uk.co.caprica.vlcj.player.headless.HeadlessMediaPlayer;
 import com.xuggle.mediatool.*;
 
 public class ThreadServidor extends Thread
 {
-
 	private static int proximoConsecutivo=0;
 	private long tiempoDeCreacion=0;
 	private static int puertoUdp = 5554;
+	private static ConvertidorVideo convertidor;
 
 	private Socket socket;
 
@@ -21,6 +22,7 @@ public class ThreadServidor extends Thread
 	{
 		this.socket=socket;
 		asignarTiempoDeCreacion(System.currentTimeMillis());
+		convertidor = new ConvertidorVideo();
 	}
 
 	public void run()
@@ -30,33 +32,16 @@ public class ThreadServidor extends Thread
 		System.out.println("Atendiendo cliente #"+consecutivo);
 		try (ObjectOutputStream salida=new ObjectOutputStream(socket.getOutputStream()); ObjectInputStream entrada=new ObjectInputStream(socket.getInputStream());)
 		{
-			File archivoTemporalOriginal=new File("./data/"+consecutivo+".avi");
-			File archivoTemporalConvertido=new File("./data/"+consecutivo+".mp4");
-			archivoTemporalOriginal.createNewFile();
-			archivoTemporalConvertido.createNewFile();
-
-			FileOutputStream fileOutputStream=new FileOutputStream(archivoTemporalOriginal);
-      while (true)
-      {
-        byte[] fragmento=(byte[])(entrada.readObject());
-        if (fragmento==null) break;
-        fileOutputStream.write(fragmento);
-      }
-      fileOutputStream.close();
-			
-			convertirVideo(archivoTemporalOriginal.getAbsolutePath(),archivoTemporalConvertido.getAbsolutePath());
-			
-      byte[] buffer=new byte[1024];
-      FileInputStream fileInputStream=new FileInputStream(archivoTemporalConvertido);
-      while (true)
-      {
-        int c=fileInputStream.read(buffer);
-        if (c==-1) break;
-        salida.writeObject(Arrays.copyOf(buffer,c));
-      }
-      salida.writeObject(null);
-      fileInputStream.close();
-			
+			Path archivoTemporalOriginal=Paths.get("./data/"+consecutivo+".avi");
+			Path archivoTemporalConvertido=Paths.get("./data/"+consecutivo+".mp4");
+			archivoTemporalOriginal.toFile().createNewFile();
+			archivoTemporalConvertido.toFile().createNewFile();
+			byte[] contenidoVideoOriginal=(byte[])(entrada.readObject());
+			Files.write(archivoTemporalOriginal,contenidoVideoOriginal);
+			//convertirVideo(archivoTemporalOriginal.toString(),archivoTemporalConvertido.toString());
+			convertidor.convertirVideo(archivoTemporalOriginal.toString(),archivoTemporalConvertido.toString());
+			byte[] contenidoVideoConvertido=Files.readAllBytes(archivoTemporalConvertido);
+			salida.writeObject(contenidoVideoConvertido);
 		}
 		catch (Exception excepcion)
 		{
@@ -64,19 +49,20 @@ public class ThreadServidor extends Thread
 		}
 		long tiempoFinalEnMilisegundos=System.currentTimeMillis();
 		long demoraEnMilisegundos=tiempoFinalEnMilisegundos-tiempoInicialEnMilisegundos;
-    System.out.println("Terminando de atender cliente #"+consecutivo);
-    Servidor.terminarConexion(demoraEnMilisegundos);
+		Servidor.terminarConexion(demoraEnMilisegundos);
 		streamingVideo("./data/"+consecutivo+".mp4");
 	}
 
 	public static void convertirVideo(String archivoTemporalOriginal, String archivoTemporalConvertido)
 	{
+		System.out.println("comienza conversion");
 		IMediaReader mediaReader=ToolFactory.makeReader(archivoTemporalOriginal);
 		IMediaWriter mediaWriter=ToolFactory.makeWriter(archivoTemporalConvertido,mediaReader);
 		mediaReader.addListener(mediaWriter);
 		while (mediaReader.readPacket()==null)
 		{
 		}
+		System.out.println("termina conversion");
 	}
 
 	public static void streamingVideo(String media){
@@ -107,7 +93,7 @@ public class ThreadServidor extends Thread
 		sb.append("}}");
 		return sb.toString();
 	}
-	
+
 	public long darTiempoDeCreacion() {
 		return tiempoDeCreacion;
 	}

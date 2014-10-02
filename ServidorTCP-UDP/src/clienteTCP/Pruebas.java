@@ -2,7 +2,7 @@ package clienteTCP;
 
 public class Pruebas
 {
-  public static int numeroClientes=4;
+  public static int numeroClientes=1;
   public static void main(String[] args)
   {
     for (int i=0; i<numeroClientes; i++)
@@ -13,10 +13,10 @@ public class Pruebas
         {
           String direccionIPServidor="localhost";
           int puertoServidor=9999;
-          String archivo="C:/pruebas/video.avi";
+          String archivo="/Users/MariaCamila/Desktop/videos/videoPrueba.avi";
           try
           {
-            Cliente.convertirVideo(direccionIPServidor,puertoServidor,archivo,false);
+            Cliente.convertirVideo(direccionIPServidor,puertoServidor,archivo);
           }
           catch (Exception ex)
           {
