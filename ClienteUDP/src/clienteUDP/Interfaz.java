@@ -1,7 +1,8 @@
 package clienteUDP;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import uk.co.caprica.vlcj.binding.LibVlc;
@@ -16,20 +17,31 @@ public class Interfaz extends JFrame
 {
 
 	private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
+	
+	private PanelInformacion panelInfo;
 
-	private Interfaz(String dir, String puerto) 
+	private Interfaz() 
 	{
-		JFrame frame = new JFrame("Ejemplo");
+		JFrame frame = new JFrame("Cliente UDP");
+		
+		panelInfo = new PanelInformacion(this);
+		
+		setLayout(new BorderLayout());
 
 		mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 
-		frame.setContentPane(mediaPlayerComponent);
+		frame.add(BorderLayout.CENTER, mediaPlayerComponent);
+		frame.add(BorderLayout.SOUTH, panelInfo);
 
 		frame.setLocation(100, 100);
 		frame.setSize(1050, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-
+		
+	}
+	
+	public void Stream(String dir, String puerto)
+	{
 		mediaPlayerComponent.getMediaPlayer().playMedia("http://"+dir+":"+puerto);
 	}
 
@@ -45,10 +57,8 @@ public class Interfaz extends JFrame
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String dir = JOptionPane.showInputDialog("Ingrese la dirección IP de la transmisión", JOptionPane.QUESTION_MESSAGE);
-				String puerto = JOptionPane.showInputDialog("Ingrese el puerto de la transmisión", JOptionPane.QUESTION_MESSAGE);
-
-				new Interfaz(dir, puerto);
+				
+				new Interfaz();
 			}
 		});
 	}
