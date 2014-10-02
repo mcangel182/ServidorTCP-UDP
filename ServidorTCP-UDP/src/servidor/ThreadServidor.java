@@ -5,8 +5,15 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.*;
 
+import uk.co.caprica.vlcj.medialist.MediaList;
 import uk.co.caprica.vlcj.player.MediaPlayerFactory;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.videosurface.CanvasVideoSurface;
 import uk.co.caprica.vlcj.player.headless.HeadlessMediaPlayer;
+import uk.co.caprica.vlcj.player.list.MediaListPlayer;
+import uk.co.caprica.vlcj.player.list.MediaListPlayerEventAdapter;
+import uk.co.caprica.vlcj.player.list.MediaListPlayerMode;
+
 import com.xuggle.mediatool.*;
 
 public class ThreadServidor extends Thread
@@ -69,11 +76,17 @@ public class ThreadServidor extends Thread
 		puertoUdp++;
 		String options = formatHttpStream("127.0.0.1", puertoUdp);
 		String[] args = {media};
+		
+        MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory();
+        MediaListPlayer mediaListPlayer = mediaPlayerFactory.newMediaListPlayer();
+		
+		MediaList mediaList = mediaPlayerFactory.newMediaList();
+        mediaList.addMedia(media, options);
 
-		MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory(args);
-		HeadlessMediaPlayer mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
+        mediaListPlayer.setMediaList(mediaList);
+        mediaListPlayer.setMode(MediaListPlayerMode.LOOP);
 
-		mediaPlayer.playMedia(media, options);
+        mediaListPlayer.play();
 
 		try {
 			Thread.currentThread().join();
