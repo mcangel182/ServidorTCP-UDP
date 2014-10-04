@@ -16,7 +16,7 @@ import com.sun.jna.NativeLibrary;
 public class Servidor extends VlcjTest
 {
 	private static int numeroDeThreadsActivos=0;
-	private static int limiteThreads=300;
+	private static int limiteThreads=50;
 	private static int limiteCola=100000;
 	private static Queue<ThreadServidor> cola=new LinkedList<>();
 	private static long tiempoEnCola = 0;
