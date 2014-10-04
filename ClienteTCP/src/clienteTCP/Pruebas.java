@@ -2,7 +2,7 @@ package clienteTCP;
 
 public class Pruebas
 {
-  public static int numeroClientes=200;
+  public static int numeroClientes=300;
   public static void main(String[] args)
   {
     for (int i=0; i<numeroClientes; i++)
